@@ -183,22 +183,22 @@ function superevents_event_details()
 {
    global $post;
    $event = get_post_custom($post->ID);
-   $location = $event['location'][0];
-   $date = $event['date'][0];
-   $time = $event['time'][0];
-   $agenda = $event['agenda'][0];
-   $minutes = $event['minutes'][0];
+   $location = $event['superevents_location'][0];
+   $eventdate = $event['superevents_eventdate'][0];
+   $time = $event['superevents_time'][0];
+   $agenda = $event['superevents_agenda'][0];
+   $minutes = $event['superevents_minutes'][0];
    ?>
-   <label for="superevents_location">Location :</label><br/>
+   <label for="superevents_location">Location :</label>
    <input type="text" name="superevents_location" value="<?php echo $location; ?>" id="superevents_location">
-   <label for="superevents_date">Date</label><br/>
-   <input type="text" name="superevents_date" value="<?php echo $date; ?>" id="superevents_date">
-   <label for="superevents_time">Time :</label><br/>
+   <label for="superevents_eventdate">Date :</label>
+   <input type="text" name="superevents_eventdate" value="<?php echo $eventdate; ?>" id="superevents_eventdate">
+   <label for="superevents_time">Time :</label>
    <input type="text" name="superevents_time" value="<?php echo $time; ?>" id="superevents_time">
-   <label for="superevents_agenda">Agenda :</label><br/>
-   <textarea name="superevents_agenda" id="superevents_agenda" rows="20" cols="60"><?php echo $agenda; ?></textarea>
-   <label for="superevents_minutes">Minutes :</label><br/>
-   <textarea name="superevents_minutes" id="superevents_minutes" rows="20" cols="60"><?php echo $minutes; ?></textarea>
+   <label for="superevents_agenda">Agenda :</label>
+   <textarea name="superevents_agenda" id="superevents_agenda" rows="10" cols="60"><?php echo $agenda; ?></textarea>
+   <label for="superevents_minutes">Minutes :</label>
+   <textarea name="superevents_minutes" id="superevents_minutes" rows="10" cols="60"><?php echo $minutes; ?></textarea>
    <?php
 }
 
@@ -207,8 +207,86 @@ add_action('save_post', 'superevents_save_post');
 function superevents_save_post()
 {
    global $post;
-   $fields = array('location','date','time','agenda','minutes');
-   
+   $fields = array('location','eventdate','time','agenda','minutes');
+   foreach($fields as $field)
+   {
+      if (isset($_POST['superevents_'. $field]))
+         update_post_meta($post->ID, "superevents_". $field, $_POST["superevents_". $field]);         
+   }
 }
+
+register_activation_hook( __FILE__, 'superevents_create_tables' );
+
+add_action( 'admin_enqueue_scripts', 'superevents_add_admin_css' );
+
+function superevents_add_admin_css()
+{
+   global $post_type;
+			
+	if ( ( isset( $_GET['post_type'] ) && $_GET['post_type'] == 'event' ) || ( isset( $post_type ) && $post_type == 'event' ) ) {
+
+		wp_enqueue_style( 'superevents_admin', plugins_url('/css/superevents_admin.css', __FILE__), array(), '1.0' );
+
+	}
+}
+
+function superevents_create_tables()
+{
+   global $wpdb;
+      $table = $wpdb->prefix."events_rsvp";
+      $structure = "CREATE TABLE IF NOT EXISTS $table (
+         id INT(9) unsigned NOT NULL AUTO_INCREMENT,
+         user_id BIGINT(20) NOT NULL,
+         event_id BIGINT(20) NOT NULL,
+         rsvp VARCHAR(9) DEFAULT 0,
+   	   PRIMARY KEY id (id)
+      );";
+      $wpdb->query($structure);
+}
+
+function superevents_uninstall()
+{
+   //Write code for uninstall
+   // Drop table events_rsvp
+}
+
+/**
+* SuperEvents RSVP widget
+*/
+class superevents_rsvp_widget extends WP_Widget
+{
+   function superevents_rsvp_widget()
+   {
+      $widget_ops = array( 'classname' => 'superevents_rsvp_widget', 'description' => 'Add this to your sidebar to let users RSVP to your events.' );
+
+      /* Widget control settings. */
+		$control_ops = array( 'width' => 300, 'height' => 350, 'id_base' => 'superevents_rsvp_widget' );
+
+		/* Create the widget. */
+		$this->WP_Widget( 'superevents_rsvp_widget', 'Events RSVP Widget', $widget_ops, $control_ops );
+      
+   }
+   
+   function widget( $args, $instance ) 
+   {
+   	extract( $args );
+
+		/* User-selected settings. */
+		$title = apply_filters('widget_title', $instance['title'] );
+
+		/* Before widget (defined by themes). */
+		echo $before_widget;
+
+		/* Title of widget (before and after defined by themes). */
+		if ( $title )
+			echo $before_title . $title . $after_title;
+
+      echo '</p>RSVP to this meeting. You should be logged in to RSVP</p>';
+
+		/* After widget (defined by themes). */
+		echo $after_widget;
+	}
+}
+
 
 ?>
