@@ -40,17 +40,17 @@ function superevents_register_events()
 
 		'labels'              => $labels,
 		'public'              => true,
-		'publicly_queryable'  => false,
+		'publicly_queryable'  => true,
 		'exclude_from_search' => false,
 		'show_ui'             => true,
 		'show_in_menu'        => true,
 		'capability_type'     => 'post',
 		'map_meta_cap'        => true,
 		'hierarchical'        => false,
-		'supports'            => array( 'title', 'comments'),
+		'supports'            => array( 'title'),
 		'taxonomies'          => array( 'type' ),
 		'has_archive'         => true,
-		'rewrite'             => false,
+		'rewrite'             => true,
 		'query_var'           => true,
 		'can_export'          => true,
 		'show_in_nav_menus'   => false
@@ -250,6 +250,14 @@ function superevents_uninstall()
    // Drop table events_rsvp
 }
 
+
+add_action( 'widgets_init', 'superevents_register_widget' );
+
+function superevents_register_widget() 
+{
+	register_widget('superevents_rsvp_widget');
+}
+
 /**
 * SuperEvents RSVP widget
 */
@@ -280,13 +288,58 @@ class superevents_rsvp_widget extends WP_Widget
 		/* Title of widget (before and after defined by themes). */
 		if ( $title )
 			echo $before_title . $title . $after_title;
-
-      echo '</p>RSVP to this meeting. You should be logged in to RSVP</p>';
+      
+      $post_type = get_post_type( $GLOBALS['post']->ID);
+      if(is_single() && ('event' === $post_type))
+      {
+         if ( is_user_logged_in() )
+         {
+            global $current_user;
+            get_currentuserinfo();
+            echo "Hi $current_user->display_name,<br/>";
+            echo "RSVP to this event<br/>";
+            echo "<form action='' METHOD='POST'>";
+            echo "<input type='radio' name='rsvp' value ='yes'><p>YES</p>";
+            echo "<input type='radio' name='rsvp' value ='no'><p>NO</p>";
+            echo "<input type='radio' name='rsvp' value ='maybe'><p>MAY BE</p>";
+            echo "</form>";
+         }
+         else
+         {
+            $url = site_url();
+            echo "<p>RSVP to this event. Please <a href='$url/wp-login.php'>Login</a> or <a href='$url/wp-login.php'>Register</a>.</p>";
+         }
+      }
+      else
+      {
+         echo '<p>Check out our events page</p>';
+      }
+      
+      
+      // get_post_type( $post ) 
 
 		/* After widget (defined by themes). */
 		echo $after_widget;
 	}
+	
+	function update($new_instance, $old_instance)
+	{
+	   $instance = $old_instance;
+	   $instance['title'] = strip_tags( $new_instance['title'] );
+      return $instance;
+	}
+	
+	function form($instance)
+	{
+	   $defaults = array('title'     => 'RSVP to this event');
+	   $instance = wp_parse_args( (array) $instance, $defaults ); ?>
+	   <p>
+         <label for="<?php echo $this->get_field_id( 'title' ); ?>">Title:</label>
+         <input id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo $instance['title']; ?>" style="width:95%;" />
+      </p>
+      
+      <?php
+	}
 }
-
 
 ?>
