@@ -250,6 +250,20 @@ function superevents_uninstall()
    // Drop table events_rsvp
 }
 
+add_action( 'wp_print_scripts', 'superevents__widget_javascript' );
+
+function superevents__widget_javascript()
+{
+	if( !is_admin() && is_single())
+	{
+	   $post_type = get_post_type( $GLOBALS['post']->ID);
+	   if ('event' === $post_type)
+	   {
+			wp_enqueue_script( 'jquery' );
+	      wp_enqueue_script( 'superevents-script', plugins_url( '/js/superevents.js', __FILE__ ), array( 'jquery' ) );
+	   }
+	}
+}
 
 add_action( 'widgets_init', 'superevents_register_widget' );
 
@@ -296,12 +310,31 @@ class superevents_rsvp_widget extends WP_Widget
          {
             global $current_user;
             get_currentuserinfo();
+            $user_id = $current_user->ID;
+            global $wpdb;
+            $table = $wpdb->prefix."events_rsvp";
+            $rsvp_results = $wpdb->get_row("SELECT * from $table where user_id = $user_id and event_id = " .$GLOBALS['post']->ID);
+            $selected = '';
+            $display_message = '';
+            if ($rsvp_results == null)
+            {
+               // User has not responded to this event yet.
+               $display_message = '<p>RSVP to this event now</p>';
+               $user_rsvp = '';
+            }
+            else
+            {
+               // User has already responded
+               $display_message = "<p>You have already responded to this event. Change RSVP if you want to</p>";
+               $user_rsvp = $rsvp_results->rsvp;
+            }
             echo "Hi $current_user->display_name,<br/>";
-            echo "RSVP to this event<br/>";
-            echo "<form action='' METHOD='POST'>";
-            echo "<input type='radio' name='rsvp' value ='yes'><p>YES</p>";
-            echo "<input type='radio' name='rsvp' value ='no'><p>NO</p>";
-            echo "<input type='radio' name='rsvp' value ='maybe'><p>MAY BE</p>";
+            echo $display_message;
+            echo "<form action='' METHOD='POST' id='superevents_rsvp_form'>";
+            echo "<input type='radio' name='superevents_rsvp' " . (('yes'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='yes'><span>YES</span>";
+            echo "<input type='radio' name='superevents_rsvp' " . (('no'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='no'><span>NO</span>";
+            echo "<input type='radio' name='superevents_rsvp' " . (('maybe'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='maybe'><span>MAY BE</span>";
+            echo "<input type='button' value='Update' id='superevents_rsvp_submit'>";
             echo "</form>";
          }
          else
