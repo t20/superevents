@@ -260,7 +260,8 @@ function superevents__widget_javascript()
 	   if ('event' === $post_type)
 	   {
 			wp_enqueue_script( 'jquery' );
-	      wp_enqueue_script( 'superevents-script', plugins_url( '/js/superevents.js', __FILE__ ), array( 'jquery' ) );
+	      wp_enqueue_script( 'superevents-script', plugins_url( '/js/superevents.js', __FILE__ ), array( 'jquery' ) , false, true);
+	      wp_localize_script( 'superevents-script', 'superevents', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 	   }
 	}
 }
@@ -331,6 +332,7 @@ class superevents_rsvp_widget extends WP_Widget
             echo "Hi $current_user->display_name,<br/>";
             echo $display_message;
             echo "<form action='' METHOD='POST' id='superevents_rsvp_form'>";
+            echo "<input type='hidden' name='superevents_event_id' id='superevents_event_id' value='" . $GLOBALS['post']->ID ."'/>";
             echo "<input type='radio' name='superevents_rsvp' " . (('yes'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='yes'><span>YES</span>";
             echo "<input type='radio' name='superevents_rsvp' " . (('no'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='no'><span>NO</span>";
             echo "<input type='radio' name='superevents_rsvp' " . (('maybe'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='maybe'><span>MAY BE</span>";
@@ -373,6 +375,22 @@ class superevents_rsvp_widget extends WP_Widget
       
       <?php
 	}
+}
+
+add_action('wp_ajax_superevents_update_rsvp', 'wp_ajax_superevents_update_rsvp');
+
+// to handle Ajax post request, Set/update RSVP
+function wp_ajax_superevents_update_rsvp()
+{
+   global $wpdb;
+   $rsvp = $_POST['rsvp'];
+   $event_id = $_POST['event_id'];
+   global $current_user;
+   get_currentuserinfo();
+   $user_id = $current_user->ID;
+   $table = $wpdb->prefix."events_rsvp";   
+   $wpdb->query("INSERT INTO $table (user_id)values())
+   die();
 }
 
 ?>

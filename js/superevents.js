@@ -1,17 +1,15 @@
 //alert ('This is a event page');
 var $j = jQuery.noConflict();
-$j(document).ready(function($) {
-   alert ('This is a event page');
-   var rsvp_value = $('input:radio[name=superevents_rsvp]:checked').val();
-   alert ('processing ' + rsvp_value);
-   
-});
 $j('#superevents_rsvp_submit').click (function($){
-   alert ('Submitting form');
-   return false;
+   alert ('This is a event page');
+   var rsvp_value = $j('input:radio[name=superevents_rsvp]:checked').val();
+   var event_id = $j('#superevents_event_id').val();
+   var data = { 
+      action : 'superevents_update_rsvp', 
+      rsvp : rsvp_value, 
+      event_id : event_id
+   }
+   jQuery.post(superevents.ajaxurl, data, function(response) {
+   		alert('Got this from the server: ' + response);
+   	});
 });
-// $j('#superevents_rsvp_form').submit( function(){
-//   //alert ('RSVP is ' + jQuery('#superevents_rsvp').val());
-//   alert ('Processing RSVP');
-//   return false;
-// });
