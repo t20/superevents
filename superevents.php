@@ -440,6 +440,9 @@ alternate way could be add_action('template_redirect', 'event_template');
 //    //exit;
 // }
 
+// if you want better control over the template, 
+// Use a file called single-event.php in your theme folder.
+
 function insert_event_mini_template($content)
 {
 	$post_type = get_post_type( $GLOBALS['post']->ID);
