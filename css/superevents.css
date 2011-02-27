@@ -5,3 +5,7 @@
    padding:4px;
    margin:4px 0;
 }
+
+#event_template_wrapper .event_label{
+   font-weight: bold;
+}

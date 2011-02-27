@@ -10,7 +10,7 @@ License: GPL2
 */
 
 add_action( 'init', 'superevents_register_events' );
-add_action('init', 'superevents_updated_messages');
+add_filter('post_updated_messages', 'superevents_updated_messages');
 add_action( 'init', 'superevents_register_taxonomy');
 
 // This function add the events post type
@@ -148,28 +148,17 @@ function superevents_custom_columns($column)
 	switch ( $column ) 
 	{
 	   case 'type' :
-	      echo 'Monthly Meeting';
+	      $terms = get_the_term_list( $post->ID, 'type', '', ',', '' );
+	      echo $terms;
 	      break;
 	   case 'head_count' :
-	      echo '10';
+	      global $wpdb;
+         $table = $wpdb->prefix."events_rsvp";
+         $rows = $wpdb->get_results($wpdb->prepare("SELECT rsvp, COUNT(*) AS headcount FROM $table WHERE event_id = %d GROUP BY rsvp ORDER BY rsvp DESC", $post->ID));
+         foreach ($rows as $row) 
+            echo ucfirst($row->rsvp) . ' : ' . $row->headcount . '<br/>';
 	      break;
    }
-}
-
-function superevents_show_event($event='')
-{
-   if ( file_exists( get_stylesheet_directory()."/superevents_show_event.php" ) ) 
-   {
-		include( STYLESHEETPATH . '/superevents_show_event.php' );
-	}	
-	elseif ( file_exists( get_template_directory()."/superevents_show_event.php" ) ) 
-	{
-		include( TEMPLATEPATH . '/superevents_show_event.php' );
-	}
-	else 
-	{
-		include( 'superevents_show_event.php' );
-	}
 }
 
 add_action('do_meta_boxes', 'superevents_add_meta_box');
@@ -332,28 +321,26 @@ class superevents_rsvp_widget extends WP_Widget
             $user_id = $current_user->ID;
             global $wpdb;
             $table = $wpdb->prefix."events_rsvp";
-            $rsvp_results = $wpdb->get_row("SELECT * from $table where user_id = $user_id and event_id = " .$GLOBALS['post']->ID);
+            $rsvp = $wpdb->get_var( $wpdb->prepare( "SELECT rsvp from $table where user_id = %d and event_id = %d" ,  $user_id, $GLOBALS['post']->ID));
             $selected = '';
             $display_message = '';
-            if ($rsvp_results == null)
+            if ($rsvp == null)
             {
                // User has not responded to this event yet.
                $display_message = '<p>RSVP to this event now</p>';
-               $user_rsvp = '';
             }
             else
             {
                // User has already responded
                $display_message = "<p>You have already responded to this event. Change RSVP if you want to</p>";
-               $user_rsvp = $rsvp_results->rsvp;
             }
             echo "Hi $current_user->display_name,<br/>";
             echo $display_message;
             echo "<form action='' METHOD='POST' id='superevents_rsvp_form'>";
             echo "<input type='hidden' name='superevents_event_id' id='superevents_event_id' value='" . $GLOBALS['post']->ID ."'/>";
-            echo "<input type='radio' name='superevents_rsvp' " . (('yes'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='yes'><span>YES</span>";
-            echo "<input type='radio' name='superevents_rsvp' " . (('no'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='no'><span>NO</span>";
-            echo "<input type='radio' name='superevents_rsvp' " . (('maybe'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='maybe'><span>MAY BE</span>";
+            echo "<input type='radio' name='superevents_rsvp' " . (('yes'== $rsvp) ? 'checked="checked"' : '' ) ." value ='yes'><span>YES</span>";
+            echo "<input type='radio' name='superevents_rsvp' " . (('no'== $rsvp) ? 'checked="checked"' : '' ) ." value ='no'><span>NO</span>";
+            echo "<input type='radio' name='superevents_rsvp' " . (('maybe'== $rsvp) ? 'checked="checked"' : '' ) ." value ='maybe'><span>MAY BE</span>";
             echo "<input type='button' value='Update' id='superevents_rsvp_submit'>";
             echo "<div id='superevents_rsvp_message'></div>";
             echo "</form>";
@@ -425,7 +412,7 @@ function wp_ajax_superevents_update_rsvp()
    $table = $wpdb->prefix."events_rsvp";
    // Unique key on user_id, event_id
    // Insert or update in one shot
-   $query_response = $wpdb->query("INSERT INTO $table (`user_id`, `event_id`, `rsvp`)values('$user_id', '$event_id' , '$rsvp') ON DUPLICATE KEY UPDATE `rsvp` = '$rsvp'");
+   $query_response = $wpdb->query($wpdb->prepare("INSERT INTO $table (`user_id`, `event_id`, `rsvp`)values(%d, %d , %s) ON DUPLICATE KEY UPDATE `rsvp` = %s" , $user_id , $event_id , $rsvp, $rsvp));
    if($query_response === false)
       $out['response'] = 'fail';
    else
@@ -436,6 +423,54 @@ function wp_ajax_superevents_update_rsvp()
    $response = json_encode($out);
    echo $response;
    die();
+}
+
+add_filter('the_content', 'insert_event_mini_template');
+
+/*
+This is not the best way to accomplish this, but..
+Adds in the custom fields for the template, if the post type is event
+alternate way could be add_action('template_redirect', 'event_template');
+*/
+
+// function event_template()
+// {
+      // Do checks here
+//    //load_template(WP_PLUGIN_DIR . '/superEvents' . '/event-template.php');
+//    //exit;
+// }
+
+function insert_event_mini_template($content)
+{
+	$post_type = get_post_type( $GLOBALS['post']->ID);
+   if(is_single() && ('event' === $post_type))
+	{
+	   // Very important!! Check if there is a template override file
+	   if ( ! file_exists( get_template_directory()."/single-event.php" ))
+	   {
+         global $post;
+                  $event = get_post_custom($post->ID);
+                  $location = $event['superevents_location'][0];
+                  $eventdate = $event['superevents_eventdate'][0];
+                  $time = $event['superevents_time'][0];
+                  $agenda = $event['superevents_agenda'][0];
+                  $minutes = $event['superevents_minutes'][0];
+         
+         $content .= "<div id='event_template_wrapper'>
+                    <div class='event_label' id='location_label'>Location:</div>
+                    <div class='event_value' id='location'>$location</div>
+                    <div class='event_label' id='eventdate_label'>Date:</div>
+                    <div class='event_value' id='eventdate'>$eventdate</div>
+                    <div class='event_label' id='time_label'>Time:</div>
+                    <div class='event_value' id='time'>$time</div>
+                    <div class='event_label' id='agenda_label'>Agenda:</div>
+                    <div class='event_value' id='agenda'>$agenda</div>
+                    <div class='event_label' id='minutes_label'>Minutes:</div>
+                    <div class='event_value' id='minutes'>$minutes</div>
+                    </div>";
+	   }
+	}
+	return $content;
 }
 
 ?>
