@@ -230,6 +230,23 @@ function superevents_add_admin_css()
 	}
 }
 
+add_action('wp_enqueue_scripts', 'superevents_add_user_css');
+
+function superevents_add_user_css()
+{
+   if ( file_exists( get_stylesheet_directory()."/superevents.css" ) ) 
+   {
+		wp_enqueue_style( 'superevents', get_stylesheet_directory_uri() . '/superevents.css', array(), '1.0' );
+	}
+	elseif ( file_exists( get_template_directory()."/superevents.css" ) ) 
+	{						
+		wp_enqueue_style( 'superevents', get_template_directory_uri() . '/superevents.css', array(), '1.0' );
+	}else 
+	{
+		wp_enqueue_style( 'superevents', plugins_url('/css/superevents.css', __FILE__), array(), '1.0' );	
+	}
+}
+
 function superevents_create_tables()
 {
    global $wpdb;
@@ -239,7 +256,8 @@ function superevents_create_tables()
          user_id BIGINT(20) NOT NULL,
          event_id BIGINT(20) NOT NULL,
          rsvp VARCHAR(9) DEFAULT 0,
-   	   PRIMARY KEY id (id)
+   	   PRIMARY KEY id (id),
+   	   CONSTRAINT user_event_pair UNIQUE (user_id, event_id)
       );";
       $wpdb->query($structure);
 }
@@ -260,8 +278,8 @@ function superevents__widget_javascript()
 	   if ('event' === $post_type)
 	   {
 			wp_enqueue_script( 'jquery' );
-	      wp_enqueue_script( 'superevents-script', plugins_url( '/js/superevents.js', __FILE__ ), array( 'jquery' ) , false, true);
-	      wp_localize_script( 'superevents-script', 'superevents', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+	      wp_enqueue_script( 'superevents-script', plugins_url( '/js/superevents.js', __FILE__ ), array( 'jquery' ) , false, true); //loading js in footer
+	      wp_localize_script( 'superevents-script', 'superevents', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ), 'postCommentNonce' => wp_create_nonce('superevents_rsvp_nounce') ) );
 	   }
 	}
 }
@@ -337,6 +355,7 @@ class superevents_rsvp_widget extends WP_Widget
             echo "<input type='radio' name='superevents_rsvp' " . (('no'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='no'><span>NO</span>";
             echo "<input type='radio' name='superevents_rsvp' " . (('maybe'== $user_rsvp) ? 'checked="checked"' : '' ) ." value ='maybe'><span>MAY BE</span>";
             echo "<input type='button' value='Update' id='superevents_rsvp_submit'>";
+            echo "<div id='superevents_rsvp_message'></div>";
             echo "</form>";
          }
          else
@@ -382,14 +401,40 @@ add_action('wp_ajax_superevents_update_rsvp', 'wp_ajax_superevents_update_rsvp')
 // to handle Ajax post request, Set/update RSVP
 function wp_ajax_superevents_update_rsvp()
 {
-   global $wpdb;
+   //Check nonce
+   $nonce = $_POST['postCommentNonce'];
+   if ( ! wp_verify_nonce( $nonce, 'superevents_rsvp_nounce' ) )
+      die ( 'Busted!');
+
+   //validate inputs
    $rsvp = $_POST['rsvp'];
-   $event_id = $_POST['event_id'];
+   $valid_rsvp_values = array('yes','no','maybe');
+   if (!in_array($rsvp, $valid_rsvp_values))
+       die ( 'Invalid values!');
+   $event_id = (int)$_POST['event_id'];
+   if (!is_int($event_id))
+      die ( 'Invalid values!');
+   if ( !is_user_logged_in())
+      die ( 'User not logged in');
+
+   $out = array('response' => 'success');
    global $current_user;
    get_currentuserinfo();
    $user_id = $current_user->ID;
-   $table = $wpdb->prefix."events_rsvp";   
-   $wpdb->query("INSERT INTO $table (user_id)values())
+   global $wpdb;   
+   $table = $wpdb->prefix."events_rsvp";
+   // Unique key on user_id, event_id
+   // Insert or update in one shot
+   $query_response = $wpdb->query("INSERT INTO $table (`user_id`, `event_id`, `rsvp`)values('$user_id', '$event_id' , '$rsvp') ON DUPLICATE KEY UPDATE `rsvp` = '$rsvp'");
+   if($query_response === false)
+      $out['response'] = 'fail';
+   else
+   {
+      $out['query_response'] = $query_response;
+      $out['rsvp_id'] = $wpdb->insert_id;
+   }
+   $response = json_encode($out);
+   echo $response;
    die();
 }
 
