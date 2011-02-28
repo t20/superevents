@@ -18,7 +18,9 @@ Copy superevents.css from the superevents/css folder, paste it to your theme fol
 
 7. (OPTIONAL STEP) if you want more control over the template:
 In your theme directory, make a copy of single.php, rename it to 'single-event.php'. 
-This template ll be picked up for all single event type pages. Please try to reuse CSS by adding superevents prefix in all your elements.
+This template ll be picked up for all single event type pages instead. 
+You may also want to overload taxonomy 'type' if required with a custom template.
+Please try to reuse CSS by adding superevents prefix in all your elements.
 
 Feedback :
 This is my first wordpress plugin. If you have any questions, comments, ideas, feedback, I would love to hear from you. If you would like to share an idea for a plugin, or need help with building your plugin, please feel free to reach me.
