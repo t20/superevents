@@ -11,13 +11,13 @@ Installation and Use:
 
 4. You will now see 'EVENTS' in your dashboard. You can create as many events as you want. You can also categorize events by type - E.g. weekly meeting, Special events, Guest speakers, etc.
 
-5. RSVP - Go to Appearance -> Widgets. You will see the RSVP widget. Add this widget to your sidebar, configure it.
+5. RSVP - Go to Appearance -> Widgets. You will see the RSVP widget. Add this widget to your sidebar, configure it. The widget appears only on event pages.
 
 6. (OPTIONAL STEP) If you want more control over CSS:
-Copy superevents.css from the superevents/css folder, paste it to your theme folder and override the values. Note: If you do so, the css file in the superevents/css folder ll not be loaded. In any case, only one of the stylesheets is loaded. 
+Copy superevents.css from the superevents/css folder, paste it to your theme folder and override the values. Note: If you do so, the css file in the superevents/css folder ll not be loaded. In any case, only one of the stylesheets is loaded. All element IDs and Classes have superevents as a prefix.
 
 7. (OPTIONAL STEP) if you want more control over the template:
 In your theme directory, make a copy of single.php, rename it to 'single-event.php'. 
-This template ll be picked up for all single event type pages.
+This template ll be picked up for all single event type pages. Please try to reuse CSS by adding superevents prefix in all your elements.
 
 Feedback : This is my first wordpress plugin. If you have any questions, comments, ideas, feedback, I would love to hear from you. Reach me at - [[teraom at teraom dot com]]

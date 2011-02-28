@@ -299,21 +299,22 @@ class superevents_rsvp_widget extends WP_Widget
    
    function widget( $args, $instance ) 
    {
-   	extract( $args );
-
-		/* User-selected settings. */
-		$title = apply_filters('widget_title', $instance['title'] );
-
-		/* Before widget (defined by themes). */
-		echo $before_widget;
-
-		/* Title of widget (before and after defined by themes). */
-		if ( $title )
-			echo $before_title . $title . $after_title;
-      
+   
       $post_type = get_post_type( $GLOBALS['post']->ID);
       if(is_single() && ('event' === $post_type))
       {
+         extract( $args );
+
+   		/* User-selected settings. */
+   		$title = apply_filters('widget_title', $instance['title'] );
+
+   		/* Before widget (defined by themes). */
+   		echo $before_widget;
+
+   		/* Title of widget (before and after defined by themes). */
+   		if ( $title )
+   			echo $before_title . $title . $after_title;
+
          if ( is_user_logged_in() )
          {
             global $current_user;
@@ -350,17 +351,11 @@ class superevents_rsvp_widget extends WP_Widget
             $url = site_url();
             echo "<p>RSVP to this event. Please <a href='$url/wp-login.php'>Login</a> or <a href='$url/wp-login.php'>Register</a>.</p>";
          }
+   		/* After widget (defined by themes). */
+		   echo $after_widget;         
       }
-      else
-      {
-         echo '<p>Check out our events page</p>';
-      }
-      
-      
-      // get_post_type( $post ) 
 
-		/* After widget (defined by themes). */
-		echo $after_widget;
+
 	}
 	
 	function update($new_instance, $old_instance)
@@ -377,8 +372,7 @@ class superevents_rsvp_widget extends WP_Widget
 	   <p>
          <label for="<?php echo $this->get_field_id( 'title' ); ?>">Title:</label>
          <input id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo $instance['title']; ?>" style="width:95%;" />
-      </p>
-      
+      </p>      
       <?php
 	}
 }
