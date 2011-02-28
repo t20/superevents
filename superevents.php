@@ -223,17 +223,21 @@ add_action('wp_enqueue_scripts', 'superevents_add_user_css');
 
 function superevents_add_user_css()
 {
-   if ( file_exists( get_stylesheet_directory()."/superevents.css" ) ) 
+   $post_type = get_post_type( $GLOBALS['post']->ID);
+   if(is_single() && ('event' === $post_type))
    {
-		wp_enqueue_style( 'superevents', get_stylesheet_directory_uri() . '/superevents.css', array(), '1.0' );
-	}
-	elseif ( file_exists( get_template_directory()."/superevents.css" ) ) 
-	{						
-		wp_enqueue_style( 'superevents', get_template_directory_uri() . '/superevents.css', array(), '1.0' );
-	}else 
-	{
-		wp_enqueue_style( 'superevents', plugins_url('/css/superevents.css', __FILE__), array(), '1.0' );	
-	}
+      if ( file_exists( get_stylesheet_directory()."/superevents.css" ) ) 
+      {
+   		wp_enqueue_style( 'superevents', get_stylesheet_directory_uri() . '/superevents.css', array(), '1.0' );
+   	}
+   	elseif ( file_exists( get_template_directory()."/superevents.css" ) ) 
+   	{						
+   		wp_enqueue_style( 'superevents', get_template_directory_uri() . '/superevents.css', array(), '1.0' );
+   	}else 
+   	{
+   		wp_enqueue_style( 'superevents', plugins_url('/css/superevents.css', __FILE__), array(), '1.0' );	
+   	}
+   }
 }
 
 function superevents_create_tables()
@@ -299,7 +303,6 @@ class superevents_rsvp_widget extends WP_Widget
    
    function widget( $args, $instance ) 
    {
-   
       $post_type = get_post_type( $GLOBALS['post']->ID);
       if(is_single() && ('event' === $post_type))
       {
