@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Super Events
-Plugin URI: http://teraom.com/#
+Plugin URI: http://teraom.com/superevents
 Description: A simple events management plugin with RSVP.
 Author: Bharadwaj
 Version: 0.1
