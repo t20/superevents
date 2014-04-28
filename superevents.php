@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Super Events
-Plugin URI: http://teraom.com/superevents
+Plugin URI: http://bharad.net/project/super-events-wordpress-plugin/
 Description: A simple events management plugin with RSVP.
-Author: Bharadwaj
-Version: 0.1
+Author: Bharad
+Version: 0.3
 Author URI: http://bharad.net/
 License: GPL2
 */

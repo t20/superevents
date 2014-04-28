@@ -1,10 +1,11 @@
 === Plugin Name ===
 Contributors: teraom
-Donate link: http://teraom.com/donate
+Donate link: http://bharad.net/donate
 Tags: events, rsvp, meetings
 Requires at least: 3.0.1
-Tested up to: 3.5.1
-Stable tag: trunk
+Tested up to: 3.8.1
+Stable tag: 0.2
+License: GPLv2
 
 Super Events is an event management plugin with RSVP. 
 
@@ -54,6 +55,9 @@ This will be available in a future release.
 3. RSVP to an event
 
 == Changelog ==
+
+= 0.3 =
+* Tested with newer versions of wordpress
 
 = 0.2 =
 * More detailed installation instructions
