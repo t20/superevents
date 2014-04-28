@@ -4,7 +4,7 @@ Plugin Name: Super Events
 Plugin URI: http://bharad.net/project/super-events-wordpress-plugin/
 Description: A simple events management plugin with RSVP.
 Author: Bharad
-Version: 0.3
+Version: 0.4
 Author URI: http://bharad.net/
 License: GPL2
 */
@@ -181,7 +181,7 @@ function superevents_event_details()
    <label for="superevents_location">Location :</label>
    <input type="text" name="superevents_location" value="<?php echo $location; ?>" id="superevents_location">
    <label for="superevents_eventdate">Date :</label>
-   <input type="text" name="superevents_eventdate" value="<?php echo $eventdate; ?>" id="superevents_eventdate">
+   <input type="text" name="superevents_eventdate" value="<?php echo $eventdate; ?>" id="superevents_eventdate" class="datepicker">
    <label for="superevents_time">Time :</label>
    <input type="text" name="superevents_time" value="<?php echo $time; ?>" id="superevents_time">
    <label for="superevents_agenda">Agenda :</label>
@@ -206,16 +206,18 @@ function superevents_save_post()
 
 register_activation_hook( __FILE__, 'superevents_create_tables' );
 
-add_action( 'admin_enqueue_scripts', 'superevents_add_admin_css' );
+add_action( 'admin_enqueue_scripts', 'superevents_add_admin_css_js' );
 
-function superevents_add_admin_css()
+function superevents_add_admin_css_js()
 {
    global $post_type;
 			
 	if ( ( isset( $_GET['post_type'] ) && $_GET['post_type'] == 'event' ) || ( isset( $post_type ) && $post_type == 'event' ) ) {
 
 		wp_enqueue_style( 'superevents_admin', plugins_url('/css/superevents_admin.css', __FILE__), array(), '1.0' );
-
+    wp_enqueue_script( 'jquery-ui-datepicker' );
+    wp_enqueue_style( 'jquery.ui.theme', plugins_url( '/css/jquery-ui-1.10.4.custom.min.css', __FILE__ ) );
+    wp_enqueue_script( 'superevents-script', plugins_url( '/js/superevents_admin.js', __FILE__ ), array( 'jquery' ) , false, true);
 	}
 }
 

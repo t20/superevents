@@ -3,8 +3,8 @@ Contributors: teraom
 Donate link: http://bharad.net/donate
 Tags: events, rsvp, meetings
 Requires at least: 3.0.1
-Tested up to: 3.8.1
-Stable tag: 0.3
+Tested up to: 3.9
+Stable tag: 0.4
 License: GPLv2
 
 Super Events is an event management plugin with RSVP. 
@@ -26,6 +26,7 @@ This section describes how to install the plugin and get it working.
  If you prefer the manual way, you can also download the superevents plugin, unzip it and upload `super-events` folder to the `/wp-content/plugins/` directory
 
 2. Activate the plugin through the 'Plugins' menu in WordPress
+
 3. You will now see 'EVENTS' post type below comments in your dashboard. You can create as many events as you want. You can also categorize events by type.
 4. Go to Appearance -> Widgets. You will see the RSVP widget. Add this widget to your sidebar, configure it. The widget appears only on event pages.
 
@@ -55,6 +56,10 @@ This will be available in a future release.
 3. RSVP to an event
 
 == Changelog ==
+
+= 0.4 =
+* Tested with Wordpress 3.9
+* Added date picker support
 
 = 0.3 =
 * Tested with newer versions of wordpress
