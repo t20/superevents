@@ -3,11 +3,11 @@ Contributors: teraom
 Donate link: http://bharad.net/donate
 Tags: events, rsvp, meetings
 Requires at least: 3.0.1
-Tested up to: 3.9
-Stable tag: 0.4
+Tested up to: 4.0.1
+Stable tag: 0.5
 License: GPLv2
 
-Super Events is an event management plugin with RSVP. 
+Super Events is an event management plugin with RSVP.
 
 == Description ==
 
