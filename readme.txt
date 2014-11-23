@@ -57,6 +57,9 @@ This will be available in a future release.
 
 == Changelog ==
 
+= 0.5 =
+* Tested with Wordpress 4.0.1
+
 = 0.4 =
 * Tested with Wordpress 3.9
 * Added date picker support
