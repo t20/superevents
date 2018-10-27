@@ -57,6 +57,10 @@ This will be available in a future release.
 
 == Changelog ==
 
+= 0.6 =
+* Tested with Wordpress 4.9.8
+* Flush rewrite rules when registering event type.
+
 = 0.5 =
 * Tested with Wordpress 4.0.1
 
