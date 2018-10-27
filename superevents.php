@@ -59,6 +59,13 @@ function superevents_register_events()
 		
    register_post_type( 'event', $args );
 
+   // Flush permalinks
+   $set = get_option('post_type_rules_flased_event');
+   if ($set !== true){
+     flush_rewrite_rules(false);
+     update_option('post_type_rules_flased_event', true);
+   }
+
 }
 
 // Adds the taxonomy for event type
