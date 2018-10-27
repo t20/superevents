@@ -4,7 +4,7 @@ Plugin Name: Super Events
 Plugin URI: http://bharad.net/project/super-events-wordpress-plugin/
 Description: A simple events management plugin with RSVP.
 Author: Bharad
-Version: 0.4
+Version: 0.6
 Author URI: http://bharad.net/
 License: GPL2
 */
